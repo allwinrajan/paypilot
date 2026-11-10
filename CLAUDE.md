@@ -49,3 +49,8 @@ Set guardrails -> create invoice -> invoice goes overdue -> agent explains -> cl
 - Done: switched AI provider to Google Gemini. src/lib/ai.ts exposes generateText({system,prompt,json}) and generateJSON({system,prompt,validate}) (strict JSON, strips code fences, validates shape, retries once, clear error). /api/ai-test route (?json=1 tests JSON). Env vars now AI_API_KEY / AI_MODEL.
 - Rule: every AI call must go through src/lib/ai.ts. Use generateJSON for invoice parsing and negotiation proposals, then run guardrail checks in plain code on the parsed result.
 - Next: fill AI_API_KEY / AI_MODEL in .env, hit /api/ai-test; then Day 2 chat -> invoice.
+
+### 2026-11-10 (connections verified)
+- PayPal sandbox: /api/paypal/test creates a real DRAFT invoice (INV2-UTNT-UDJM-WUWE-YPSW, $120). Gemini: /api/ai-test text + JSON both OK (gemini-3.6-flash).
+- Gotcha: ticking Invoicing on an existing sandbox app never granted the invoicing scope (403 NOT_AUTHORIZED). Fix: new Merchant app linked to the Business sandbox account, Invoicing ticked. Restart dev server after changing keys (token is cached in memory).
+- Next: Day 2 chat -> invoice (generateJSON + plain-code validation -> createDraftInvoice), SQLite store, seed data, guardrails form.
