@@ -84,6 +84,7 @@ export interface InvoiceItemInput {
 export interface DraftInvoiceInput {
   recipientEmail: string;
   recipientName?: { givenName: string; surname: string };
+  recipientBusinessName?: string;
   currency?: string; // default USD (multi-currency is out of scope)
   items: InvoiceItemInput[];
   dueDate?: string; // YYYY-MM-DD
@@ -111,6 +112,7 @@ export async function createDraftInvoice(input: DraftInvoiceInput): Promise<PayP
       {
         billing_info: {
           email_address: input.recipientEmail,
+          ...(input.recipientBusinessName ? { business_name: input.recipientBusinessName } : {}),
           ...(input.recipientName
             ? { name: { given_name: input.recipientName.givenName, surname: input.recipientName.surname } }
             : {}),
@@ -145,6 +147,19 @@ export async function sendInvoice(
     method: "POST",
     body: JSON.stringify({ send_to_invoicer: false, send_to_recipient: true, ...opts }),
   });
+}
+
+/** Cancels a SENT invoice (used when an installment plan replaces it). */
+export async function cancelInvoice(invoiceId: string, note: string): Promise<void> {
+  await paypalFetch(`/v2/invoicing/invoices/${encodeURIComponent(invoiceId)}/cancel`, {
+    method: "POST",
+    body: JSON.stringify({ note, send_to_invoicer: false, send_to_recipient: false }),
+  });
+}
+
+/** Deletes a DRAFT invoice. */
+export async function deleteInvoice(invoiceId: string): Promise<void> {
+  await paypalFetch(`/v2/invoicing/invoices/${encodeURIComponent(invoiceId)}`, { method: "DELETE" });
 }
 
 export async function getInvoice(invoiceId: string): Promise<PayPalInvoice> {

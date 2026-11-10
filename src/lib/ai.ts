@@ -28,23 +28,39 @@ export interface GenerateTextInput {
   json?: boolean;
 }
 
+/** Temporary provider problems (overloaded / rate limited) are worth retrying after a pause. */
+const isTransient = (msg: string) => /\b(429|500|503)\b|UNAVAILABLE|RESOURCE_EXHAUSTED|overloaded|high demand/i.test(msg);
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const RETRY_DELAYS_MS = [1500, 4000];
+
 export async function generateText({ system, prompt, json }: GenerateTextInput): Promise<string> {
   const { client, model } = getConfig();
-  try {
-    const response = await client.models.generateContent({
-      model,
-      contents: prompt,
-      config: {
-        ...(system ? { systemInstruction: system } : {}),
-        ...(json ? { responseMimeType: "application/json" } : {}),
-      },
-    });
-    const text = response.text;
-    if (!text) throw new AIError("The AI returned an empty reply.");
-    return text;
-  } catch (err) {
-    if (err instanceof AIError) throw err;
-    throw new AIError(`AI request failed: ${err instanceof Error ? err.message : String(err)}`);
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const response = await client.models.generateContent({
+        model,
+        contents: prompt,
+        config: {
+          ...(system ? { systemInstruction: system } : {}),
+          ...(json ? { responseMimeType: "application/json" } : {}),
+        },
+      });
+      const text = response.text;
+      if (!text) throw new AIError("The AI returned an empty reply.");
+      return text;
+    } catch (err) {
+      if (err instanceof AIError) throw err;
+      const msg = err instanceof Error ? err.message : String(err);
+      if (attempt < RETRY_DELAYS_MS.length && isTransient(msg)) {
+        await sleep(RETRY_DELAYS_MS[attempt]);
+        continue;
+      }
+      throw new AIError(
+        isTransient(msg)
+          ? "The AI service is busy right now. Please try again in a moment."
+          : `AI request failed: ${msg}`,
+      );
+    }
   }
 }
 

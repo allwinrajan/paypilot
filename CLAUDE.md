@@ -27,6 +27,9 @@ Next.js (TypeScript) full-stack, SQLite, PayPal Invoicing API (sandbox), Google 
 8. Seeded demo clients with different payment histories
 Fallback if time runs short: client picks from 3 fixed plan options instead of free negotiation.
 Skip: real email sending, login, multi-currency (mention as "next").
+Negotiation design (decided 2026-11-10): hybrid. Client sees 3 code-built plans + can type own request; AI only converts request to numbers (installments, upfrontPct, spanDays, discountPct); code builds + validates; outside rules -> owner approval queue. AI never computes amounts or dates.
+## Design
+UI inspired by a modern agent-dashboard layout (sidebar, greeting, stat cards, command box, approvals, activity), own PayPilot branding. Light theme, ~15% glassmorphism (glass / glass-strong utilities in globals.css). Do not copy third-party branding.
 ## Roadmap
 - Day 1 (Nov 8-9): scaffold, one sandbox invoice via API, blank deploy to Render
 - Day 2 (Nov 9-10): chat -> invoice, store + status sync, seed data, guardrails form
@@ -54,3 +57,11 @@ Set guardrails -> create invoice -> invoice goes overdue -> agent explains -> cl
 - PayPal sandbox: /api/paypal/test creates a real DRAFT invoice (INV2-UTNT-UDJM-WUWE-YPSW, $120). Gemini: /api/ai-test text + JSON both OK (gemini-3.6-flash).
 - Gotcha: ticking Invoicing on an existing sandbox app never granted the invoicing scope (403 NOT_AUTHORIZED). Fix: new Merchant app linked to the Business sandbox account, Invoicing ticked. Restart dev server after changing keys (token is cached in memory).
 - Next: Day 2 chat -> invoice (generateJSON + plain-code validation -> createDraftInvoice), SQLite store, seed data, guardrails form.
+
+### 2026-11-10 (all 8 features built)
+- Done: SQLite (better-sqlite3 pinned 11.10.0: newer versions have no Node 20 Windows prebuild) with seed data; guardrails.ts (buildPlan/validatePlan/standardPlans, pure code); agent.ts (AI prompts with rule-based fallbacks); service.ts (chat->invoice, overdue agent, client request, owner approval, installment invoices + cancel original, PayPal sync); API routes; glass UI: Home dashboard, Invoices (AG Grid v36), Clients, Guardrails (live preview), public /pay/[token] client page (polls every 5s; owner dashboard polls every 8s).
+- Verified against real Gemini + PayPal sandbox: chat->invoice (#0005), agent explanations, client choose plan -> 2 installment invoices (#0003, #0004) with pay links, out-of-rules request -> approval queue, EUR request blocked by code. Build + lint clean.
+- Next.js 16 note: cacheComponents is on; every DB-reading GET route calls await connection(). Dynamic page params need Suspense.
+- Gemini free tier returns 503 'high demand' at times: ai.ts retries 2x (1.5s, 4s); agent.ts falls back to template text.
+- Next: set PAYPAL_TEST_RECIPIENT_EMAIL, push to GitHub, deploy to Render, run full flow 3x, screenshots, video, Devpost submission.
+- Known: local DB contains test data (use Guardrails > Reset demo data before recording). Render free disk resets on redeploy (DB re-seeds itself).

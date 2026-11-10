@@ -1,26 +1,90 @@
 @import "tailwindcss";
 
+/* PayPilot design tokens: light, calm, premium with a touch of glass. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f4f6fb;
+  --foreground: #0f172a;
+  --muted: #64748b;
+  --primary: #2563eb;
+  --primary-strong: #1d4ed8;
+  color-scheme: light;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-strong: var(--primary-strong);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+html,
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* Soft color fields behind the glass surfaces. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(900px 520px at 8% -10%, rgba(99, 102, 241, 0.24), transparent 60%),
+    radial-gradient(760px 480px at 100% 0%, rgba(14, 165, 233, 0.2), transparent 60%),
+    radial-gradient(800px 560px at 70% 110%, rgba(20, 184, 166, 0.16), transparent 60%),
+    linear-gradient(180deg, #f7f8fc 0%, #eef2f9 100%);
+}
+
+/* Frosted glass card. Used for most surfaces. */
+@utility glass {
+  background: rgba(255, 255, 255, 0.58);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 10px 32px -12px rgba(15, 23, 42, 0.12);
+}
+
+/* Slightly more solid glass, for inputs and nested surfaces. */
+@utility glass-strong {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+/* Subtle entrance animation for new content. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-rise {
+  animation: rise 0.35s ease-out both;
+}
+
+::selection {
+  background: rgba(37, 99, 235, 0.18);
+}
+
+/* AG Grid: let the glass card show through. */
+.ag-theme-glass .ag-root-wrapper {
+  background: transparent;
 }
