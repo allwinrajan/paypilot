@@ -12,12 +12,12 @@ The freelancer sets guardrails once (minimum upfront %, maximum installments, ma
 
 - Next.js (TypeScript, App Router), Tailwind CSS
 - PayPal Invoicing API v2 (sandbox)
-- Claude API (model set by `CLAUDE_MODEL`)
+- Google Gemini API, free tier (model set by `AI_MODEL`); all AI calls go through `src/lib/ai.ts`
 - SQLite, AG Grid (planned)
 
 ## Run locally
 
-Requirements: Node.js 20+, a free PayPal developer account, an Anthropic API key.
+Requirements: Node.js 20+, a free PayPal developer account, a free Google Gemini API key.
 
 ```bash
 git clone https://github.com/allwinrajan/paypilot.git
@@ -36,8 +36,8 @@ Open http://localhost:3000.
 | `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET` | developer.paypal.com → Apps & Credentials → **Sandbox** → create an app → copy Client ID and Secret |
 | `PAYPAL_MODE` | Keep as `sandbox` |
 | `PAYPAL_TEST_RECIPIENT_EMAIL` | Optional. developer.paypal.com → Testing Tools → Sandbox Accounts → email of the **Personal** account |
-| `ANTHROPIC_API_KEY` | console.anthropic.com → API Keys |
-| `CLAUDE_MODEL` | Claude model ID, default `claude-opus-5-5` |
+| `AI_API_KEY` | aistudio.google.com → **Get API key** → Create API key |
+| `AI_MODEL` | A Gemini model ID from AI Studio, e.g. `gemini-3.6-flash` |
 
 ### Check the PayPal connection
 
@@ -45,6 +45,11 @@ With the dev server running, open:
 
 - http://localhost:3000/api/paypal/test creates one draft sandbox invoice
 - http://localhost:3000/api/paypal/test?send=1 creates one and sends it
+
+### Check the AI connection
+
+- http://localhost:3000/api/ai-test sends one short prompt and shows the reply
+- http://localhost:3000/api/ai-test?json=1 tests structured JSON output
 
 A response with `"ok": true` and an invoice `id` means PayPal is connected. The invoice is listed under the sandbox **Business** account at https://www.sandbox.paypal.com.
 

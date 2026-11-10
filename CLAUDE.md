@@ -15,7 +15,7 @@ The user may change the idea, audience, features, or stack at any time. When the
 ## Judging (each 20%)
 Technology, Design, Potential Impact, Innovation, Presentation (end-to-end demo).
 ## Stack
-Next.js (TypeScript) full-stack, SQLite, PayPal Invoicing API (sandbox), Claude API (model from env var CLAUDE_MODEL), AG Grid for the invoice table, deploy on Render.
+Next.js (TypeScript) full-stack, SQLite, PayPal Invoicing API (sandbox), Google Gemini API free tier via official @google/genai SDK (env AI_API_KEY, AI_MODEL; all AI calls go through src/lib/ai.ts so the provider can be swapped), AG Grid for the invoice table, deploy on Render.
 ## Features (current scope; changes need my approval)
 1. Chat box: plain English -> PayPal sandbox invoice
 2. Dashboard (AG Grid): draft/sent/paid/overdue, synced from PayPal
@@ -35,7 +35,7 @@ Skip: real email sending, login, multi-currency (mention as "next").
 ## Demo flow (video)
 Set guardrails -> create invoice -> invoice goes overdue -> agent explains -> client negotiates -> installment invoices appear -> dashboard updates.
 ## Previous versions
-(none yet)
+- Stack until 2026-11-10: Claude API (ANTHROPIC_API_KEY, CLAUDE_MODEL). Switched to Gemini free tier; no AI code existed yet, so nothing to migrate.
 ## Progress log
 (Update at the end of every session: done, next, known bugs.)
 
@@ -44,3 +44,8 @@ Set guardrails -> create invoice -> invoice goes overdue -> agent explains -> cl
 - Not verified yet: a real sandbox invoice (needs PayPal keys in .env). Render deploy not done.
 - Next: fill .env, hit /api/paypal/test, push to GitHub, blank Render deploy; then Day 2 (chat -> invoice, SQLite, seed data, guardrails form).
 - Known issues: about 1 day behind roadmap (Day 1 items finishing on Nov 10). Fallback plan (3 fixed plan options) may be needed.
+
+### 2026-11-10 (AI provider swap)
+- Done: switched AI provider to Google Gemini. src/lib/ai.ts exposes generateText({system,prompt,json}) and generateJSON({system,prompt,validate}) (strict JSON, strips code fences, validates shape, retries once, clear error). /api/ai-test route (?json=1 tests JSON). Env vars now AI_API_KEY / AI_MODEL.
+- Rule: every AI call must go through src/lib/ai.ts. Use generateJSON for invoice parsing and negotiation proposals, then run guardrail checks in plain code on the parsed result.
+- Next: fill AI_API_KEY / AI_MODEL in .env, hit /api/ai-test; then Day 2 chat -> invoice.
