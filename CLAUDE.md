@@ -65,3 +65,9 @@ Set guardrails -> create invoice -> invoice goes overdue -> agent explains -> cl
 - Gemini free tier returns 503 'high demand' at times: ai.ts retries 2x (1.5s, 4s); agent.ts falls back to template text.
 - Next: set PAYPAL_TEST_RECIPIENT_EMAIL, push to GitHub, deploy to Render, run full flow 3x, screenshots, video, Devpost submission.
 - Known: local DB contains test data (use Guardrails > Reset demo data before recording). Render free disk resets on redeploy (DB re-seeds itself).
+
+### 2026-11-10 (end of day: guide + deck)
+- Done: screenshots in docs/screenshots (committed). Local-only (uncommitted, user wants them local): docs/PayPilot-App-Guide.docx (16-page guide) and docs/PayPilot-Presentation.pptx (13 slides with speaker notes). User preference: documents are local files; ask before using Claude Docs/artifacts.
+- User tested Reject in the approval queue: works. Activity log "Co.." double period fixed.
+- Pending (in order): 1) set PAYPAL_TEST_RECIPIENT_EMAIL + restart; 2) pay one installment in sandbox + Sync (Paid flow untested); 3) git push origin main; 4) GitHub About + MIT visible; 5) check LICENSE name (alvinrajan vs allwinrajan); 6) deploy to Render; 7) reset demo + run flow 3x; 8) record video <3 min, YouTube public; 9) Devpost story (Claude drafts); 10) submit by Nov 12 12:00 pm Pacific (aim 6 pm IST Nov 12).
+- Local DB currently has test data (Andes request pending approval). Reset before recording.
