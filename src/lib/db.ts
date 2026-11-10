@@ -444,7 +444,8 @@ export function updateNegotiation(
 // ---------- Activity feed ----------
 
 export function logActivity(kind: string, text: string) {
-  db().prepare("INSERT INTO activity (kind, text) VALUES (?, ?)").run(kind, text);
+  // Names like "Andes Coffee Co." would otherwise produce "Co.." at the end of a sentence.
+  db().prepare("INSERT INTO activity (kind, text) VALUES (?, ?)").run(kind, text.replace(/\.\.(\s|$)/g, ".$1"));
 }
 
 export function listActivity(limit = 12): Activity[] {
